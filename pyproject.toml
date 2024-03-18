@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "rustbininfo"
+version = "0.1.0"
+description = ""
+authors = ["Nofix <noreply>"]
+readme = "README.md"
+packages = [{include = "rustbininfo", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pytz = "^2024.1"
+rich = "^13.7.1"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.2.0"
+pytest = "^8.1.1"
+flake8 = "^7.0.0"
+mypy = "^1.9.0"
+types-pytz = "^2024.1.0.20240203"
+types-requests = "^2.31.0.20240311"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+rustbininfo = "rustbininfo.main:main_cli"
+rbi = "rustbininfo.main:main_cli"
