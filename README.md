@@ -1,6 +1,6 @@
 Get information about a stripped rust executable.
 
-This tool is mentioned in [this] (https://nofix.re/posts/2024-11-02-rust-symbs/) and [this](https://nofix.re/posts/2024-08-03-arti-rust/) blogposts.
+This tool is mentioned in [this](https://nofix.re/posts/2024-11-02-rust-symbs/) and [this](https://nofix.re/posts/2024-08-03-arti-rust/) blogposts.
 
 ## Usage
 ```
