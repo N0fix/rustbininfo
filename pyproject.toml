@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "rustbininfo"
 version = "0.3.0"
-description = ""
+description = "Get information about stripped rust executables"
 authors = ["Nofix <16479266+N0fix@users.noreply.github.com>"]
 readme = "README.md"
 packages = [{include = "rustbininfo", from = "src"}]
