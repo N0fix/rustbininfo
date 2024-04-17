@@ -51,5 +51,7 @@ Tests requieres git-lfs to retrive the test executable.
 Then, execute the following command:
 
 ```
+git lfs fetch
+git lfs pull
 pytest -s
 ```
