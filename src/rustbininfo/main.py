@@ -64,9 +64,11 @@ def parse_args():
 
     # Subcommand parsers
     subparsers = parser.add_subparsers(dest="mode", title="mode", help="Mode to use")
-    subparsers.add_parser(
+
+    info_parser = subparsers.add_parser(
         "info", help="Get information about an executable", parents=[target]
     )
+    info_parser.add_argument('-f', '--full', action='store_true', default=False)
 
     subparsers.add_parser(
         "guess_project_date",
@@ -96,7 +98,7 @@ def main_cli():
         sys.exit(1)
 
     if args.mode == "info":
-        print(TargetRustInfo.from_target(args.target))
+        print(TargetRustInfo.from_target(args.target, not args.full))
 
     elif args.mode == "download":
         c = Crate.from_depstring(args.crate, fast_load=False)

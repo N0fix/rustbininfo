@@ -4,7 +4,7 @@ from typing import List, Optional
 
 import requests
 import semver
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 from ...exception import InvalidVersionError
 from ...logger import log
@@ -22,7 +22,7 @@ class Crate(BaseModel):
     version: str
     features: List[str] = []
     repository: Optional[str] = None
-    _fast_load: bool = True
+    fast_load: Optional[bool] = Field(init=True, repr=False)
     _available_versions: List[str] = []
     _api_base_url: str = "https://crates.io/"
     _version_info: dict = None
@@ -34,6 +34,7 @@ class Crate(BaseModel):
             obj = cls(
                 name=name,
                 version=str(semver.Version.parse(version)),
+                fast_load = fast_load
             )
 
         except:  # noqa E722
@@ -41,13 +42,14 @@ class Crate(BaseModel):
             obj = cls(
                 name=name,
                 version=str(semver.Version.parse(version)),
+                fast_load = fast_load
             )
 
         obj._fast_load = fast_load
         return obj
 
     def model_post_init(self, __context) -> None:
-        if not self._fast_load:
+        if not self.fast_load:
             _ = self.metadata  # triggers getter
 
     @property

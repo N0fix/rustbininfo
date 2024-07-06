@@ -7,13 +7,10 @@ from pydantic import BaseModel
 
 from ..compiler import get_rustc_version
 from ..dependencies import get_dependencies
-from ..specifics.mingw import (
-    RULE_MINGW_6_GCC_8_3_0,
-    RULE_MINGW_7_GCC_9_3_0,
-    RULE_MINGW_8_GCC_10_3_0,
-    RULE_MINGW_10_GCC_12_2_0,
-    RULE_MINGW_11_GCC_13_1_0,
-)
+from ..specifics.mingw import (RULE_MINGW_6_GCC_8_3_0, RULE_MINGW_7_GCC_9_3_0,
+                               RULE_MINGW_8_GCC_10_3_0,
+                               RULE_MINGW_10_GCC_12_2_0,
+                               RULE_MINGW_11_GCC_13_1_0)
 from .crate import Crate
 
 """
@@ -77,10 +74,10 @@ class TargetRustInfo(BaseModel):
     # guess_is_debug_build: bool
 
     @classmethod
-    def from_target(cls, path: pathlib.Path):
+    def from_target(cls, path: pathlib.Path, fast_load: bool = True):
         content = open(path, "rb").read()
         commit, version = get_rustc_version(path)
-        dependencies: Set[Crate] = get_dependencies(path, True)
+        dependencies: Set[Crate] = get_dependencies(path, fast_load)
         dependencies = sorted(list(dependencies), key=lambda x: x.name)
 
         return TargetRustInfo(
