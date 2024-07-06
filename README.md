@@ -1,3 +1,6 @@
+[![pypi package](https://badge.fury.io/py/rustbininfo.svg)](https://pypi.org/project/rustbininfo)
+[![GitHub](https://img.shields.io/github/license/N0fix/rustbininfo.svg)](https://github.com/N0fix/rustbininfo/blob/master/LICENSE)
+
 Get information about a stripped rust executable.
 
 This tool is mentioned in [this](https://nofix.re/posts/2024-11-02-rust-symbs/) and [this](https://nofix.re/posts/2024-08-03-arti-rust/) blogposts.
