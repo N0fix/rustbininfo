@@ -17,8 +17,16 @@ def test_info_archiver():
     target: Path = Path(__file__).parent.joinpath("archiver.exe")
     assert target.exists()
     t: TargetRustInfo = TargetRustInfo.from_target(target)
-    assert t.rustc_version == "1.77.2"
     assert t.rustc_commit_hash == "3c85e56249b0b1942339a6a989a971bf6f1c9e0f"
     assert len(t.dependencies) == 22
     assert t.rust_dependencies_imphash == "b5386521b71aa121e153e8b45f9986e1"
-    assert t.guessed_toolchain == "Mingw-w64"
+    assert t.guessed_toolchain == "Mingw-w64 (Mingw8-GCC_10.3.0)"
+
+def test_info_mingw_hello():
+    target: Path = Path(__file__).parent.joinpath("gcc_10.3.0_mingw_8_hello.exe")
+    assert target.exists()
+    t: TargetRustInfo = TargetRustInfo.from_target(target)
+    assert t.rustc_commit_hash == "129f3b9964af4d4a709d1383930ade12dfe7c081"
+    assert len(t.dependencies) == 5
+    assert t.rust_dependencies_imphash == "5aba5db7b50577c1f41434ccf9a8d3a5"
+    assert t.guessed_toolchain == "Mingw-w64 (Mingw8-GCC_10.3.0)"

@@ -9,7 +9,8 @@ from .models.crate import Crate
 def _guess_dependencies(content: bytes) -> Set:
     regexes = [
         rb'index.crates.io.[^\\\/]+.([^\\\/]+)',
-        rb'registry.src.[^\\\/]+.([^\\\/]+)'
+        rb'registry.src.[^\\\/]+.([^\\\/]+)',
+        rb'rust.deps.([^\\\/]+)'
     ]
     result = []
     for reg in regexes:
@@ -19,11 +20,13 @@ def _guess_dependencies(content: bytes) -> Set:
 
     return result
 
-def get_dependencies(target: pathlib.Path) -> Set[Crate]:
+def get_dependencies(target: pathlib.Path, fast_load=False) -> Set[Crate]:
+    reserved_names = ['rustc-demangle']
     result = []
     data = open(target, "rb").read()
     res = _guess_dependencies(data)
     for dep in set(res):
+        # Cleaning dependency name
         try:
             dep = dep[: dep.index(b"\x00")]
         except: # noqa E722
@@ -31,8 +34,10 @@ def get_dependencies(target: pathlib.Path) -> Set[Crate]:
 
         if dep == b"":
             continue
+        # End of cleaning
+
         log.debug(f"Found dependency : {dep}")
-        c = Crate.from_depstring(dep.decode(), fast_load=False)
-        if c.name != "rustc-demangle":
+        c = Crate.from_depstring(dep.decode(), fast_load)
+        if c.name not in reserved_names:
             result.append(c)
     return set(result)
