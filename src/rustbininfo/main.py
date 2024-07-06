@@ -71,7 +71,7 @@ def parse_args():
     subparsers.add_parser(
         "guess_project_date",
         parents=[target],
-        help="Tries to guess date latest depdnency got added to the project, based on dependencies version", # noqa E501
+        help="Tries to guess date latest depdnency got added to the project, based on dependencies version",  # noqa E501
     )
 
     download_parser = subparsers.add_parser(

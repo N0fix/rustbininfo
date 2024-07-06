@@ -7,7 +7,13 @@ from pydantic import BaseModel
 
 from ..compiler import get_rustc_version
 from ..dependencies import get_dependencies
-from ..specifics.mingw import *
+from ..specifics.mingw import (
+    RULE_MINGW_6_GCC_8_3_0,
+    RULE_MINGW_7_GCC_9_3_0,
+    RULE_MINGW_8_GCC_10_3_0,
+    RULE_MINGW_10_GCC_12_2_0,
+    RULE_MINGW_11_GCC_13_1_0,
+)
 from .crate import Crate
 
 """
@@ -21,15 +27,29 @@ def guess_is_debug(target: pathlib.Path) -> bool:
 
 def guess_toolchain(target_content: bytes) -> Optional[str]:
     known_heuristics = {
-        lambda c: (yara.compile(source=RULE_MINGW_6_GCC_8_3_0).match(data=c)):   "Mingw-w64 (Mingw6-GCC_8.3.0)",
-        lambda c: (yara.compile(source=RULE_MINGW_7_GCC_9_3_0).match(data=c)):   "Mingw-w64 (Mingw7-GCC_9.3.0)",
-        lambda c: (yara.compile(source=RULE_MINGW_8_GCC_10_3_0).match(data=c)):  "Mingw-w64 (Mingw8-GCC_10.3.0)",
-        lambda c: (yara.compile(source=RULE_MINGW_10_GCC_12_2_0).match(data=c)): "Mingw-w64 (Mingw10-GCC_12.2.0)",
-        lambda c: (yara.compile(source=RULE_MINGW_11_GCC_13_1_0).match(data=c)): "Mingw-w64 (Mingw11-GCC_13.1.0)",
-        lambda c: (b"Mingw-w64 runtime failure" in c): "Mingw-w64 (Could not find mingw/gcc version)",
+        lambda c: (
+            yara.compile(source=RULE_MINGW_6_GCC_8_3_0).match(data=c)
+        ): "Mingw-w64 (Mingw6-GCC_8.3.0)",
+        lambda c: (
+            yara.compile(source=RULE_MINGW_7_GCC_9_3_0).match(data=c)
+        ): "Mingw-w64 (Mingw7-GCC_9.3.0)",
+        lambda c: (
+            yara.compile(source=RULE_MINGW_8_GCC_10_3_0).match(data=c)
+        ): "Mingw-w64 (Mingw8-GCC_10.3.0)",
+        lambda c: (
+            yara.compile(source=RULE_MINGW_10_GCC_12_2_0).match(data=c)
+        ): "Mingw-w64 (Mingw10-GCC_12.2.0)",
+        lambda c: (
+            yara.compile(source=RULE_MINGW_11_GCC_13_1_0).match(data=c)
+        ): "Mingw-w64 (Mingw11-GCC_13.1.0)",
+        lambda c: (
+            b"Mingw-w64 runtime failure" in c
+        ): "Mingw-w64 (Could not find mingw/gcc version)",
         lambda c: (b"_CxxThrowException" in c): "windows-msvc",
         lambda c: (b".CRT$" in c): "windows-msvc",
-        lambda c: (b"/checkout/src/llvm-project/libunwind/src/DwarfInstructions.hpp" in c): "linux-musl",
+        lambda c: (
+            b"/checkout/src/llvm-project/libunwind/src/DwarfInstructions.hpp" in c
+        ): "linux-musl",
     }
 
     for item, value in known_heuristics.items():

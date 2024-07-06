@@ -13,6 +13,7 @@ def test_info():
     assert t.rust_dependencies_imphash == "cd7358d2cd75458edda70d567f1555fa"
     assert t.guessed_toolchain == "windows-msvc"
 
+
 def test_info_archiver():
     target: Path = Path(__file__).parent.joinpath("archiver.exe")
     assert target.exists()
@@ -21,6 +22,7 @@ def test_info_archiver():
     assert len(t.dependencies) == 22
     assert t.rust_dependencies_imphash == "b5386521b71aa121e153e8b45f9986e1"
     assert t.guessed_toolchain == "Mingw-w64 (Mingw8-GCC_10.3.0)"
+
 
 def test_info_mingw_hello():
     target: Path = Path(__file__).parent.joinpath("gcc_10.3.0_mingw_8_hello.exe")

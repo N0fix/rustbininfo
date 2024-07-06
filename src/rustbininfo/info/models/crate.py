@@ -36,7 +36,7 @@ class Crate(BaseModel):
                 version=str(semver.Version.parse(version)),
             )
 
-        except: # noqa E722
+        except:  # noqa E722
             name, version, _ = dep_str.rsplit("-", 2)
             obj = cls(
                 name=name,

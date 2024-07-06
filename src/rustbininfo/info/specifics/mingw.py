@@ -25,7 +25,7 @@ RULE_MINGW_6_GCC_8_3_0 = """rule rust_mingw6_gcc_8_3_0 {
         41 5E                         //         pop     r14
         41 5F                         //         pop     r15
         5D                            //         pop     rbp
-        C3                
+        C3
     } // pei386_runtime_relocator
 
 
@@ -207,7 +207,7 @@ RULE_MINGW_11_GCC_13_1_0 = """rule rust_mingw11_gcc_13_1_0 {
       41 5E                    //  pop     r14
       41 5F                    //  pop     r15
       5D                       //  pop     rbp
-      C3                     
+      C3
     } // pei386_runtime_relocator
   $b = {
     83 FA 10                   // cmp     edx, 10h

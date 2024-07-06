@@ -31,9 +31,7 @@ def get_min_max_update_time(crates: List) -> Tuple[datetime, datetime]:
         # print(dep.metadata)
         for i, version in enumerate(dep.metadata["versions"]):
             if version["num"] == dep.version:
-                d = datetime.strptime(
-                    version["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z"
-                )
+                d = datetime.strptime(version["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
                 min_date = max(d, min_date)
                 break
 
