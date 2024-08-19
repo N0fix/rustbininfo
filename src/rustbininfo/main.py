@@ -14,9 +14,8 @@ DESCRIPTION = (
 
 example_text = r"""Usage examples:
 
- rbi info 'challenge.exe'
- rbi download hyper-0.14.27
- rbi guess_project_date 'challenge.exe'
+ rbi 'challenge.exe'
+ rbi -d 'challenge.exe'
 """
 
 
@@ -56,34 +55,19 @@ def parse_args():
         epilog=example_text,
     )
 
-    target = ArgumentParser(add_help=False)
-    target.add_argument(
+    parser.add_argument('-f', '--full', action='store_true', default=False, required=False)
+
+    parser.add_argument(
+        '-d',
+        "--project-date",
+        help="Tries to guess date latest depdnency got added to the project, based on dependencies version",  # noqa E501
+        required=False,
+        action='store_true'
+    )
+
+    parser.add_argument(
         type=str,
         dest="target",
-    )
-
-    # Subcommand parsers
-    subparsers = parser.add_subparsers(dest="mode", title="mode", help="Mode to use")
-
-    info_parser = subparsers.add_parser(
-        "info", help="Get information about an executable", parents=[target]
-    )
-    info_parser.add_argument('-f', '--full', action='store_true', default=False)
-
-    subparsers.add_parser(
-        "guess_project_date",
-        parents=[target],
-        help="Tries to guess date latest depdnency got added to the project, based on dependencies version",  # noqa E501
-    )
-
-    download_parser = subparsers.add_parser(
-        "download", help="Download a crate. Exemple: rand_chacha-0.3.1"
-    )
-
-    download_parser.add_argument("crate")
-    download_parser.add_argument("--directory", required=False, default=None)
-    download_parser.add_argument(
-        "-e", "--extract", required=False, default=None, action="store_true"
     )
 
     return parser
@@ -97,27 +81,29 @@ def main_cli():
         parser.print_help(sys.stderr)
         sys.exit(1)
 
-    if args.mode == "info":
-        print(TargetRustInfo.from_target(args.target, not args.full))
-
-    elif args.mode == "download":
-        c = Crate.from_depstring(args.crate, fast_load=False)
-        try:
-            result = c.download(args.directory)
-
-        except InvalidVersionError:
-            print("Version of your crate does not exists on crates.io")
-            exit(1)
-
-        print(f"{c} downloaded to {result}")
-
-        if args.extract:
-            print(f"Extracted to {extract_tarfile(pathlib.Path(result))}")
-
-    elif args.mode == "guess_project_date":
+    if args.project_date:
         t = TargetRustInfo.from_target(args.target)
         min_date, max_date = get_min_max_update_time(t.dependencies)
         print(f"Latest dependency was added between {min_date} and {max_date}")
+        exit(1)
+
+    # if args.mode == "info":
+    print(TargetRustInfo.from_target(args.target, not args.full))
+
+    # elif args.mode == "download":
+    #     c = Crate.from_depstring(args.crate, fast_load=False)
+    #     try:
+    #         result = c.download(args.directory)
+
+    #     except InvalidVersionError:
+    #         print("Version of your crate does not exists on crates.io")
+    #         exit(1)
+
+    #     print(f"{c} downloaded to {result}")
+
+    #     if args.extract:
+    #         print(f"Extracted to {extract_tarfile(pathlib.Path(result))}")
+
 
 
 if __name__ == "__main__":
