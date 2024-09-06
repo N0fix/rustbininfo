@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rustbininfo"
-version = "0.5.1"
+version = "0.5.2"
 description = "Get information about stripped rust executables"
 authors = ["Nofix <16479266+N0fix@users.noreply.github.com>"]
 readme = "README.md"
@@ -11,6 +11,9 @@ python = "^3.10"
 pytz = "^2024.1"
 rich = "^13.7.1"
 yara-python = "^4.5.0"
+requests = "^2.32.3"
+semver = "^3.0.2"
+pydantic = "^2.9.0"
 
 
 [tool.poetry.group.dev.dependencies]
