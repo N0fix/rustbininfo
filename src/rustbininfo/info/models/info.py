@@ -66,8 +66,8 @@ def imphash(dependencies: List[Crate]):
 
 
 class TargetRustInfo(BaseModel):
-    rustc_version: str
-    rustc_commit_hash: str
+    rustc_version: Optional[str]
+    rustc_commit_hash: Optional[str]
     dependencies: List[Crate]
     rust_dependencies_imphash: str
     guessed_toolchain: Optional[str] = None
