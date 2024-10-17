@@ -3,8 +3,10 @@ import re
 from typing import Optional, Tuple
 
 import requests
+from pydantic import ValidationError
 
 from ..logger import log
+from .models.github_api import GitHubResponse
 
 
 def get_rustc_commit(target: pathlib.Path) -> Optional[str]:
@@ -35,6 +37,21 @@ def _get_latest_rustc_version():
     return regex.findall(res)[0]
 
 
+def _get_nightly_version_from_commit(commit: str) -> Optional[str]:
+    url = f"https://api.github.com/search/issues?q={commit}+repo:rust-lang/rust"
+    try:
+        res = GitHubResponse.model_validate((requests.get(url, timeout=20).json()))
+    except ValidationError as e:
+        log.error(f"Validation error while processing GitHub response: {e}")
+        return None
+
+    if res.items and res.items[0].milestone and res.items[0].milestone.title:
+        milestone_title = res.items[0].milestone.title
+        return f"{milestone_title}-nightly"
+    
+    return None
+
+
 def get_rustc_version(target: pathlib.Path) -> Tuple[Optional[str], Optional[str]]:
     """Get rustc version used in target executable.
 
@@ -51,8 +68,11 @@ def get_rustc_version(target: pathlib.Path) -> Tuple[Optional[str], Optional[str
     log.debug(f"Found commit {commit}")
     version = _get_version_from_commit(commit)
     if version is None:
-        log.debug("No tag matching this commit, getting latest version")
-        return (commit, _get_latest_rustc_version())
+        log.debug("No tag matching this commit, getting milestone version")
+        version = _get_nightly_version_from_commit(commit)
+        if version is None:
+            log.debug("No milestone matching this commit, getting latest version")
+            return (commit, _get_latest_rustc_version())
 
-    log.debug(f"Found tag {version}")
+    log.debug(f"Found tag/milestone {version}")
     return (commit, version)
