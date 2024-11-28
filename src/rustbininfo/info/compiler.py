@@ -71,8 +71,8 @@ def get_rustc_version(target: pathlib.Path) -> Tuple[Optional[str], Optional[str
         log.debug("No tag matching this commit, getting milestone version")
         version = _get_nightly_version_from_commit(commit)
         if version is None:
-            log.debug("No milestone matching this commit, getting latest version")
-            return (commit, _get_latest_rustc_version())
+            log.debug("No milestone matching this commit, unknown version")
+            return (commit, None)
 
     log.debug(f"Found tag/milestone {version}")
     return (commit, version)
