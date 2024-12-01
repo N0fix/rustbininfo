@@ -1,14 +1,17 @@
+from __future__ import annotations
+
 import json
+import pathlib
 from pathlib import Path
 from typing import List, Optional
 
 import requests
 import semver
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
 from ...exception import InvalidVersionError
 from ...logger import log
-from ...utils import get_default_dest_dir
+from ...utils import get_writable_dir_in_tmp
 
 
 def _urljoin(base: str, *parts: str) -> str:
@@ -20,10 +23,10 @@ def _urljoin(base: str, *parts: str) -> str:
 class Crate(BaseModel):
     name: str
     version: str
-    features: List[str] = []
-    repository: Optional[str] = None
-    fast_load: Optional[bool] = Field(init=True, repr=False)
-    _available_versions: List[str] = []
+    features: list[str] = []
+    repository: str | None = None
+    fast_load: bool | None = Field(init=True, repr=False)
+    _available_versions: list[str] = []
     _api_base_url: str = "https://crates.io/"
     _version_info: dict = None
 
@@ -34,7 +37,7 @@ class Crate(BaseModel):
             obj = cls(
                 name=name,
                 version=str(semver.Version.parse(version)),
-                fast_load = fast_load
+                fast_load=fast_load,
             )
 
         except:  # noqa E722
@@ -42,7 +45,7 @@ class Crate(BaseModel):
             obj = cls(
                 name=name,
                 version=str(semver.Version.parse(version)),
-                fast_load = fast_load
+                fast_load=fast_load,
             )
 
         obj._fast_load = fast_load
@@ -64,7 +67,7 @@ class Crate(BaseModel):
         self._metadata = value
 
     def _get_metadata(self) -> dict:
-        log.debug(f"Downloading metadata for {self.name}")
+        log.debug("Downloading metadata for %s", self.name)
         uri = _urljoin(self._api_base_url, *["api", "v1", "crates", self.name])
         headers = {"User-Agent": "rustbinsign (https://github.com/N0fix/rustbinsign)"}
         res = requests.get(uri, timeout=20, headers=headers)
@@ -86,14 +89,14 @@ class Crate(BaseModel):
 
         return result
 
-    def download(self, destination_directory: Optional[Path] = None) -> Path:
-        log.info(f"Downloading crate {self.name}")
+    def download(self, destination_directory: Path | None = None) -> Path:
+        log.info("Downloading crate %s", self.name)
 
         if len(self._available_versions) == 0:
             self._get_metadata()
 
         if destination_directory is None:
-            destination_directory = get_default_dest_dir()
+            destination_directory = get_writable_dir_in_tmp()
 
         uri = _urljoin(self._api_base_url, *self._version_info["dl_path"].split("/"))
         headers = {"User-Agent": "rustbinsign (https://github.com/N0fix/rustbinsign)"}
@@ -101,7 +104,8 @@ class Crate(BaseModel):
         assert res.status_code == 200
 
         result_file = destination_directory.joinpath(f"{self}.tar.gz")
-        open(result_file, "wb+").write(res.content)
+        with pathlib.Path(result_file).open("wb+") as f:
+            f.write(res.content)
 
         return result_file
 

@@ -1,14 +1,15 @@
-from typing import List, Optional
+from __future__ import annotations
+
 from pydantic import BaseModel
 
 
 class Milestone(BaseModel):
-    title: Optional[str]
+    title: str | None
 
 
 class GitHubIssue(BaseModel):
-    milestone: Optional[Milestone]
+    milestone: Milestone | None
 
 
 class GitHubResponse(BaseModel):
-    items: List[GitHubIssue]
+    items: list[GitHubIssue]

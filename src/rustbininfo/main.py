@@ -1,16 +1,11 @@
-import pathlib
 import sys
-import tarfile
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 from rich import print
 
-from rustbininfo import Crate, TargetRustInfo, get_min_max_update_time
-from rustbininfo.exception import InvalidVersionError
+from rustbininfo import TargetRustInfo, get_min_max_update_time
 
-DESCRIPTION = (
-    """Get information about stripped rust executable, and download its dependencies."""
-)
+DESCRIPTION = """Get information about stripped rust executable, and download its dependencies."""
 
 example_text = r"""Usage examples:
 
@@ -18,7 +13,8 @@ example_text = r"""Usage examples:
  rbi -d 'challenge.exe'
 """
 
-def parse_args():
+
+def parse_args() -> ArgumentParser:  # noqa: D103
     # Main parser
     parser = ArgumentParser(
         description=DESCRIPTION,
@@ -26,14 +22,14 @@ def parse_args():
         epilog=example_text,
     )
 
-    parser.add_argument('-f', '--full', action='store_true', default=False, required=False)
+    parser.add_argument("-f", "--full", action="store_true", default=False, required=False)
 
     parser.add_argument(
-        '-d',
+        "-d",
         "--project-date",
         help="Tries to guess date latest depdnency got added to the project, based on dependencies version",  # noqa E501
         required=False,
-        action='store_true'
+        action="store_true",
     )
 
     parser.add_argument(
@@ -44,7 +40,7 @@ def parse_args():
     return parser
 
 
-def main_cli():
+def main_cli() -> None:  # noqa: D103
     parser = parse_args()
     args = parser.parse_args()
 
@@ -59,6 +55,7 @@ def main_cli():
         sys.exit(1)
 
     print(TargetRustInfo.from_target(args.target, not args.full))
+
 
 if __name__ == "__main__":
     main_cli()

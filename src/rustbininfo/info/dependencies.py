@@ -30,6 +30,7 @@ def get_dependencies(target: pathlib.Path, fast_load=False) -> Set[Crate]:
         # Cleaning dependency name
         try:
             dep = dep[: dep.index(b"\x00")]
+
         except:  # noqa E722
             pass
 
