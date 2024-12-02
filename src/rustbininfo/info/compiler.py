@@ -28,7 +28,7 @@ def get_rustc_commit(target: pathlib.Path) -> str | None:
         if res is None:
             return None
 
-        return res.group(0)[len("rustc/") :].decode()
+        return res.group(1).decode()
 
 
 def _get_version_from_commit(commit: str) -> str:
