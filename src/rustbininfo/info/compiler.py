@@ -28,7 +28,20 @@ def get_rustc_commit(target: pathlib.Path) -> str | None:
         if res is None:
             return None
 
-        return res.group(0)[len("rustc/") :].decode()
+        return res.group(1).decode()
+
+
+def _get_version_from_comment(target: pathlib.Path) -> Optional[str]:
+    data = open(target, "rb").read()
+    # .comment section:
+    # rustc version 1.85.0-nightly
+    # rustc version 1.83.0
+    res = re.search(b"rustc\s*version\s*([a-zA-Z0-9._-]+)", data)
+
+    if res is None:
+        return None
+
+    return res.group(1).decode()
 
 
 def _get_version_from_commit(commit: str) -> str:
@@ -64,6 +77,17 @@ def get_rustc_version(target: pathlib.Path) -> tuple[str | None, str | None]:
 
     """
     commit = get_rustc_commit(target)
+
+    version = _get_version_from_comment(target)
+
+    if commit is None and version is None:
+        return (None, None)
+
+    # version is not None, no need to continue and look it up via GitHub
+    if version:
+        log.debug(f"Found version {version} as a hardcoded string")
+        return (commit, version)
+
     if commit is None:
         return (None, None)
 
