@@ -9,11 +9,11 @@ from .models.crate import Crate
 def _guess_dependencies(content: bytes) -> Set:
     regexes = [
         # "/index.crates.io-6f17d22bba15001f/rayon-core-1.12.1/src/job.rs
-        rb"index.crates.io.[^\\\/]+.([a-zA-z0-9_-]+-[a-zA-z0-9._-]+)",
+        rb"index.crates.io.[^\\\/]+.([a-zA-Z0-9_-]+-[a-zA-Z0-9._-]+)",
         # \registry\src\github.com-1ecc6299db9ec823\aho-corasick-0.7.15\src\ahocorasick.rs
-        rb"registry.src.[^\\\/]+.([a-zA-z0-9_-]+-[a-zA-z0-9._-]+)",
+        rb"registry.src.[^\\\/]+.([a-zA-Z0-9_-]+-[a-zA-Z0-9._-]+)",
         # /rust/deps\indexmap-2.2.6\src\map\core.rs
-        rb"rust.deps.([a-zA-z0-9_-]+-[a-zA-z0-9._-]+)",
+        rb"rust.deps.([a-zA-Z0-9_-]+-[a-zA-Z0-9._-]+)",
     ]
     result = set()
     for reg in regexes:
