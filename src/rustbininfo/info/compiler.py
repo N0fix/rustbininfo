@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import pathlib
 import re
-from typing import Optional, Tuple
 
 import requests
 from pydantic import ValidationError
@@ -31,12 +30,13 @@ def get_rustc_commit(target: pathlib.Path) -> str | None:
         return res.group(1).decode()
 
 
-def _get_version_from_comment(target: pathlib.Path) -> Optional[str]:
-    data = open(target, "rb").read()
+def _get_version_from_comment(target: pathlib.Path) -> str | None:
+    with pathlib.Path(target).open("rb") as f:
+        data = f.read()
     # .comment section:
     # rustc version 1.85.0-nightly
     # rustc version 1.83.0
-    res = re.search(b"rustc\s*version\s*([a-zA-Z0-9._-]+)", data)
+    res = re.search(b"rustc version ([a-zA-Z0-9._-]+)", data)
 
     if res is None:
         return None
