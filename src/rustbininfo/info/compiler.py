@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import pathlib
 import re
 
@@ -7,7 +8,7 @@ import requests
 from pydantic import ValidationError
 
 from ..logger import log
-from .models.github_api import GitHubResponse
+from .models.github_api import GitHubResponse, GithubSpecificTagInfo, GithubTagResponse
 
 
 def get_rustc_commit(target: pathlib.Path) -> str | None:
@@ -58,13 +59,22 @@ def _get_version_from_commit(commit: str) -> str:
 
     return None
 
-
+# rustup +1.70.0-x86_64-unknown-linux-musl component add rust-src rustc-dev llvm-tools-preview --target x86_64-unknown-linux-musl
 def _get_latest_rustc_version() -> str | None:
     url = "https://github.com/rust-lang/rust/tags"
     res = requests.get(url, timeout=20).text
     regex = re.compile(r"/rust-lang/rust/releases/tag/([0-9\.]+)")
     return regex.findall(res)[0]
 
+def get_rustc_version_date(rustc_version: str) -> str | None:
+    URI = "https://api.github.com/repos/rust-lang/rust/tags?per_page=100"
+    tags = GithubTagResponse.model_validate(requests.get(URI, timeout=20).json()).root
+    for tag in tags:
+        if tag.name == rustc_version:
+            response = GithubSpecificTagInfo.model_validate(requests.get(tag.commit.url, timeout=20).json())
+            return datetime.datetime.fromisoformat(response.commit.committer.date).strftime("%Y-%m-%d")
+
+    return None
 
 def get_rustc_version(target: pathlib.Path) -> tuple[str | None, str | None]:
     """Get rustc version used in target executable.

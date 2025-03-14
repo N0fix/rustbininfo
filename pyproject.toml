@@ -1,42 +1,44 @@
-[tool.poetry]
+[project]
 name = "rustbininfo"
 version = "0.5.5"
 description = "Get information about stripped rust executables"
-authors = ["Nofix <16479266+N0fix@users.noreply.github.com>"]
+authors = [{name="Nofix", email="16479266+N0fix@users.noreply.github.com"}]
 readme = "README.md"
-packages = [{include = "rustbininfo", from = "src"}]
+requires-python = ">=3.10"
+dependencies = [
+    "pydantic>=2.10.6",
+    "pytz>=2025.1",
+    "requests>=2.32.3",
+    "rich>=13.9.4",
+    "semver>=3.0.4",
+    "yara-python>=4.5.1",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-pytz = "^2024.1"
-rich = "^13.7.1"
-yara-python = "^4.5.0"
-requests = "^2.32.3"
-semver = "^3.0.2"
-pydantic = "^2.9.0"
-
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.1.1"
-ruff = "^0.8.1"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
+[project.scripts]
 rustbininfo = "rustbininfo.main:main_cli"
 rbi = "rustbininfo.main:main_cli"
 
 [tool.ruff]
-line-length=120
+line-length = 120
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
 
 [tool.ruff.lint]
-select=["ALL"]
+select = ["ALL"]
 ignore=[
     "INP001",
     "D100",
     "A004",
     "TID252",
     "S324",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9.8",
 ]
