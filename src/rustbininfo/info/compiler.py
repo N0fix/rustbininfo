@@ -59,7 +59,6 @@ def _get_version_from_commit(commit: str) -> str:
 
     return None
 
-# rustup +1.70.0-x86_64-unknown-linux-musl component add rust-src rustc-dev llvm-tools-preview --target x86_64-unknown-linux-musl
 def _get_latest_rustc_version() -> str | None:
     url = "https://github.com/rust-lang/rust/tags"
     res = requests.get(url, timeout=20).text

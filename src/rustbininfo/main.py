@@ -5,6 +5,7 @@ from rich import print
 
 from rustbininfo import TargetRustInfo, get_min_max_update_time
 from rustbininfo.info.compiler import get_rustc_version_date
+from rustbininfo.info.nightly.nightly import NightlyGetter
 
 DESCRIPTION = """Get information about stripped rust executable, and download its dependencies."""
 
@@ -41,6 +42,14 @@ def parse_args() -> ArgumentParser:  # noqa: D103
     )
 
     parser.add_argument(
+        "--nightly",
+        "-n",
+        help="Get compiler nightly version",
+        required=False,
+        action="store_true",
+    )
+
+    parser.add_argument(
         type=str,
         dest="target",
     )
@@ -56,8 +65,14 @@ def main_cli() -> None:  # noqa: D103
         parser.print_help(sys.stderr)
         sys.exit(1)
 
-    if args.project_date or args.version:
+    if args.project_date or args.version or args.nightly:
         t = TargetRustInfo.from_target(args.target)
+
+    if args.nightly:
+        nightly_getter = NightlyGetter()
+        date = nightly_getter.get_nightly_toolchain_for_rustc_version(t.rustc_version)
+        print(f"Nightly version: nightly-{date}-<toolchain> (e.g nightly-{date}-x86_64-unknown-linux-gnu)")
+        sys.exit(0)
 
     if args.project_date:
         min_date, max_date = get_min_max_update_time(t.dependencies)
