@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import pathlib
 from pathlib import Path
-from typing import List, Optional
 
 import requests
 import semver
@@ -31,9 +30,10 @@ class Crate(BaseModel):
     _version_info: dict = None
 
     @classmethod
-    def from_depstring(cls, dep_str: str, fast_load=True) -> "Crate":
+    def from_depstring(cls, dep_str: str, fast_load=True) -> Crate:
         try:
             name, version = dep_str.rsplit("-", 1)
+
             obj = cls(
                 name=name,
                 version=str(semver.Version.parse(version)),
@@ -41,7 +41,9 @@ class Crate(BaseModel):
             )
 
         except:  # noqa E722
-            name, version, _ = dep_str.rsplit("-", 2)
+            # e.g: crate-name-0.1.0-pre.2
+            name, version, patch = dep_str.rsplit("-", 2)
+            version += f"-{patch}"
             obj = cls(
                 name=name,
                 version=str(semver.Version.parse(version)),

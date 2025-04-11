@@ -19,8 +19,8 @@ def test_info_archiver():
     assert target.exists()
     t: TargetRustInfo = TargetRustInfo.from_target(target)
     assert t.rustc_commit_hash == "3c85e56249b0b1942339a6a989a971bf6f1c9e0f"
-    assert len(t.dependencies) == 22
-    assert t.rust_dependencies_imphash == "b5386521b71aa121e153e8b45f9986e1"
+    assert len(t.dependencies) == 27
+    assert t.rust_dependencies_imphash == "1fc25c0f86878f87c056dea2da6c6458"
     assert t.guessed_toolchain == "Mingw-w64 (Mingw8-GCC_10.3.0)"
 
 

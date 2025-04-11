@@ -75,6 +75,18 @@ def get_rustc_version_date(rustc_version: str) -> str | None:
 
     return None
 
+def _guess_commit_from_dates(target: pathlib.Path):
+    URI = "https://api.github.com/repos/rust-lang/rust/commits"
+    from rustbininfo.info.dependencies import get_dependencies
+    from rustbininfo.utils import get_min_max_update_time
+
+    t = get_dependencies(target, fast_load=True)
+    date_min, date_max = get_min_max_update_time(t)
+
+    tags = requests.get(URI, params={"since": date_min.isoformat(), "until": date_max.isoformat()}, timeout=20).json()
+    return tags[0]["sha"]
+
+
 def get_rustc_version(target: pathlib.Path) -> tuple[str | None, str | None]:
     """Get rustc version used in target executable.
 
@@ -88,6 +100,9 @@ def get_rustc_version(target: pathlib.Path) -> tuple[str | None, str | None]:
     commit = get_rustc_commit(target)
 
     version = _get_version_from_comment(target)
+
+    if commit is None:
+        commit = _guess_commit_from_dates(target)
 
     if commit is None and version is None:
         return (None, None)
