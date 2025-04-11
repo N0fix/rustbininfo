@@ -1,6 +1,6 @@
 [project]
 name = "rustbininfo"
-version = "0.5.7"
+version = "0.6.0"
 description = "Get information about stripped rust executables"
 authors = [{name="Nofix", email="16479266+N0fix@users.noreply.github.com"}]
 readme = "README.md"
