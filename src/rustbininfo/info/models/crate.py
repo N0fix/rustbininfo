@@ -19,11 +19,21 @@ def _urljoin(base: str, *parts: str) -> str:
     return base
 
 
-class Crate(BaseModel):
+class ReducedRepresentation:
+    def __repr_args__(self: BaseModel) -> "ReprArgs":
+        # Disable repr of field if "repr" attribute is not False and value isn't evaluated to False
+        return [
+            (key, value)
+            for key, value in self.__dict__.items()
+            if self.model_fields.get(key) and not self.model_fields[key].repr == False and value
+        ]
+
+
+class Crate(ReducedRepresentation, BaseModel):
     name: str
     version: str
-    features: list[str] = []
-    repository: str | None = None
+    features: list[str] = Field(default=[])
+    repository: str | None = Field(default=None)
     fast_load: bool | None = Field(init=True, repr=False)
     _available_versions: list[str] = []
     _api_base_url: str = "https://crates.io/"
