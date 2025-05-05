@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import yara
 from pydantic import BaseModel
 
-from ..compiler import get_rustc_version
+from ..compiler import BasicProvider
 from ..dependencies import get_dependencies
 from ..specifics.mingw import (
     RULE_MINGW_6_GCC_8_3_0,
@@ -76,9 +76,13 @@ class TargetRustInfo(BaseModel):
     # guess_is_debug_build: bool
 
     @classmethod
-    def from_target(cls, path: pathlib.Path, fast_load: bool = True):
+    def from_target(cls, path: pathlib.Path, fast_load: bool = True, provider: BasicProvider = None):
+        if provider is None:
+            provider = BasicProvider()
         content = open(path, "rb").read()
-        commit, version = get_rustc_version(path)
+        commit, version = provider.get_rustc_version(path)
+        if version is None:
+            version = "nightly-unknown-date"
         dependencies: set[Crate] = get_dependencies(path, fast_load)
         dependencies = sorted(dependencies, key=lambda x: x.name)
 

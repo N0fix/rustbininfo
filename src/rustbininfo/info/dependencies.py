@@ -14,6 +14,8 @@ def _guess_dependencies(content: bytes) -> Set:
         rb"registry.src.[^\\\/]+.([a-zA-Z0-9_-]+-[a-zA-Z0-9._-]+)",
         # /rust/deps\indexmap-2.2.6\src\map\core.rs
         rb"rust.deps.([a-zA-Z0-9_-]+-[a-zA-Z0-9._-]+)",
+        # crate-1.0.0\src\lib.rs
+        rb"\x00([a-z0-9_-]+-[a-zA-Z0-9._-]+)[\\/][a-z]",
     ]
     result = set()
     for reg in regexes:
