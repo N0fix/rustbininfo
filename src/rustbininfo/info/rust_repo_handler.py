@@ -9,12 +9,9 @@ from .compiler import BasicProvider
 try:
     import git
 
-except ImportError:
-    print(
-        "`git` was not found, have you installed the 'gitpython' extra ? (pip install rustbininfo[gitpython])",
-        file=sys.stderr,
-    )
-    sys.exit(1)
+except ImportError as exc:
+    error = "`git` was not found, have you installed the 'gitpython' extra ? (pip install rustbininfo[gitpython])"
+    raise ImportError(error) from exc
 
 
 class GitRepoProvider(BasicProvider):

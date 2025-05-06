@@ -7,7 +7,6 @@ from rich import print
 from rustbininfo import TargetRustInfo, get_min_max_update_time
 from rustbininfo.info.compiler import BasicProvider
 from rustbininfo.info.nightly.nightly import NightlyGetter
-from rustbininfo.info.rust_repo_handler import GitRepoProvider
 
 DESCRIPTION = """Get information about stripped rust executable, and download its dependencies."""
 
