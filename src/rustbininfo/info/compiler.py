@@ -4,7 +4,7 @@ import datetime
 import pathlib
 import re
 
-import requests
+import httpx
 from pydantic import ValidationError
 
 from ..logger import log
@@ -66,7 +66,7 @@ class BasicProvider:
     def rustc_version_from_commit(self, commit: str) -> str:
         url = f"https://api.github.com/search/issues?q={commit}+repo:rust-lang/rust"
         try:
-            res = GitHubResponse.model_validate(requests.get(url, timeout=20).json())
+            res = GitHubResponse.model_validate(httpx.get(url, timeout=20).json())
             if res.items and res.items[0].milestone and res.items[0].milestone.title:
                 milestone_title = res.items[0].milestone.title
                 return str(milestone_title)
@@ -79,16 +79,16 @@ class BasicProvider:
 
     def get_latest_rustc_version(self) -> str | None:
         url = "https://github.com/rust-lang/rust/tags"
-        res = requests.get(url, timeout=20).text
+        res = httpx.get(url, timeout=20).text
         regex = re.compile(r"/rust-lang/rust/releases/tag/([0-9\.]+)")
         return regex.findall(res)[0]
 
     def get_rustc_version_date(self, rustc_version: str) -> str | None:
         URI = "https://api.github.com/repos/rust-lang/rust/tags?per_page=100"
-        tags = GithubTagResponse.model_validate(requests.get(URI, timeout=20).json()).root
+        tags = GithubTagResponse.model_validate(httpx.get(URI, timeout=20).json()).root
         for tag in tags:
             if tag.name == rustc_version:
-                response = GithubSpecificTagInfo.model_validate(requests.get(tag.commit.url, timeout=20).json())
+                response = GithubSpecificTagInfo.model_validate(httpx.get(tag.commit.url, timeout=20).json())
                 return datetime.datetime.fromisoformat(response.commit.committer.date).strftime("%Y-%m-%d")
 
         return None
@@ -96,7 +96,7 @@ class BasicProvider:
     def get_commit_date(self, commit: str) -> str:
         URI = "https://api.github.com/repos/rust-lang/rust/commits"
         response = GithubSpecificTagInfo.model_validate(
-            requests.get(URI, params={"sha": commit, "per_page": "1"}).json()[0]
+            httpx.get(URI, params={"sha": commit, "per_page": "1"}).json()[0]
         )
         return datetime.datetime.fromisoformat(response.commit.committer.date).strftime("%Y-%m-%d")
 
@@ -110,9 +110,7 @@ class BasicProvider:
         if date_min.timestamp() <= 10_000:
             return None
 
-        tags = requests.get(
-            URI, params={"since": date_min.isoformat(), "until": date_max.isoformat()}, timeout=20
-        ).json()
+        tags = httpx.get(URI, params={"since": date_min.isoformat(), "until": date_max.isoformat()}, timeout=20).json()
         return tags[0]["sha"]
 
     def get_rustc_version(self, target: pathlib.Path) -> tuple[str | None, str | None]:

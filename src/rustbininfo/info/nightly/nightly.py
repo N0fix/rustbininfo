@@ -1,6 +1,6 @@
 import datetime
 
-import requests
+import httpx
 
 from rustbininfo.info.models.github_api import GithubSpecificTagInfo, GithubTagResponse
 
@@ -8,10 +8,10 @@ from rustbininfo.info.models.github_api import GithubSpecificTagInfo, GithubTagR
 class NightlyGetter:
     def get_nightly_toolchain_for_rustc_version(self, rustc_version) -> str | None:
         URI = "https://api.github.com/repos/rust-lang/rust/tags?per_page=100"
-        tags = GithubTagResponse.model_validate(requests.get(URI, timeout=20).json()).root
+        tags = GithubTagResponse.model_validate(httpx.get(URI, timeout=20).json()).root
         for tag in tags:
             if tag.name == rustc_version:
-                response = GithubSpecificTagInfo.model_validate(requests.get(tag.commit.url, timeout=20).json())
+                response = GithubSpecificTagInfo.model_validate(httpx.get(tag.commit.url, timeout=20).json())
                 return datetime.datetime.fromisoformat(response.commit.committer.date).strftime("%Y-%m-%d")
 
         return None

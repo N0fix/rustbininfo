@@ -2,15 +2,17 @@ from __future__ import annotations
 
 import json
 import pathlib
+import tarfile
 from pathlib import Path
 
-import requests
 import semver
 from pydantic import BaseModel, Field
 
 from ...exception import InvalidVersionError
 from ...logger import log
 from ...utils import get_writable_dir_in_tmp
+from ..http_client import client
+from .registry import get_registry_cfg
 
 
 def _urljoin(base: str, *parts: str) -> str:
@@ -20,7 +22,7 @@ def _urljoin(base: str, *parts: str) -> str:
 
 
 class ReducedRepresentation:
-    def __repr_args__(self: BaseModel) -> "ReprArgs":
+    def __repr_args__(self: BaseModel) -> ReprArgs:
         # Disable repr of field if "repr" attribute is not False and value isn't evaluated to False
         return [
             (key, value)
@@ -36,7 +38,6 @@ class Crate(ReducedRepresentation, BaseModel):
     repository: str | None = Field(default=None)
     fast_load: bool | None = Field(init=True, repr=False)
     _available_versions: list[str] = []
-    _api_base_url: str = "https://crates.io/"
     _version_info: dict = None
 
     @classmethod
@@ -80,9 +81,9 @@ class Crate(ReducedRepresentation, BaseModel):
 
     def _get_metadata(self) -> dict:
         log.debug("Downloading metadata for %s", self.name)
-        uri = _urljoin(self._api_base_url, *["api", "v1", "crates", self.name])
+        uri = _urljoin("https://crates.io", *["api", "v1", "crates", self.name])
         headers = {"User-Agent": "rustbinsign (https://github.com/N0fix/rustbinsign)"}
-        res = requests.get(uri, timeout=20, headers=headers)
+        res = client.get(uri, timeout=20, headers=headers)
         result = json.loads(res.text)
         # self._metadata = result
         for version in result["versions"]:
@@ -101,25 +102,46 @@ class Crate(ReducedRepresentation, BaseModel):
 
         return result
 
+    def _get_default_destination_dir(self) -> Path:
+        return get_writable_dir_in_tmp()
+
     def download(self, destination_directory: Path | None = None) -> Path:
         log.info("Downloading crate %s", self.name)
 
-        if len(self._available_versions) == 0:
-            self._get_metadata()
-
         if destination_directory is None:
-            destination_directory = get_writable_dir_in_tmp()
+            destination_directory = self._get_default_destination_dir()
 
-        uri = _urljoin(self._api_base_url, *self._version_info["dl_path"].split("/"))
+        uri = _urljoin(get_registry_cfg().dl, self.name, self.version, "download")
         headers = {"User-Agent": "rustbinsign (https://github.com/N0fix/rustbinsign)"}
-        res = requests.get(uri, timeout=20, headers=headers)
+        res = client.get(uri, timeout=20, headers=headers)
         assert res.status_code == 200
 
         result_file = destination_directory.joinpath(f"{self}.tar.gz")
         with pathlib.Path(result_file).open("wb+") as f:
-            f.write(res.content)
+            # Should ensure that the file is fully written to disk, unlink otherwise.
+            try:
+                f.write(res.content)
+
+            except Exception as exc:
+                pathlib.Path(result_file).unlink()
+                raise exc
 
         return result_file
+
+    def download_untar(self, destination_directory: Path | None = None, remove_tar: bool = False) -> Path:
+        if not destination_directory:
+            destination_directory = self._get_default_destination_dir()
+
+        path = self.download(destination_directory)
+
+        with tarfile.open(path) as tar:
+            tar.extractall(destination_directory, filter="data")
+            tar.close()
+
+        if remove_tar:
+            tar.unlink()
+
+        return Path(f"{str(path).strip('.tar.gz')}")
 
     def __str__(self):
         return f"{self.name}-{self.version}"
